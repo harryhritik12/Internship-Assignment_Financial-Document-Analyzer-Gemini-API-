@@ -1,179 +1,144 @@
-Financial Document Analyzer (Gemini API)
+Financial Document Analyzer
 
-This project is a financial document analyzer that extracts text from PDF files and uses Google Gemini API to generate insights such as investment analysis, risk assessment, and key highlights.
+An AI-powered tool for analyzing financial reports (PDFs), performing investment analysis, and risk assessments.
+This project integrates Google Gemini API as the core LLM engine.
 
-🐞 Bugs Found & Fixes
-1. TypeError: 'module' object is not callable
+🚨 Bugs Found & Fixes
+1. Dependency Conflicts
 
-Cause: Used @tools(...) from crewai_tools, but tools is a module, not a decorator.
+Issue: Multiple version conflicts between crewai, opentelemetry, and onnxruntime.
 
-Fix: Removed CrewAI decorators and switched to Gemini API directly.
+Fix:
 
-2. ImportError: cannot import name 'tool' from 'crewai'
+Loosened strict version pins in requirements.txt.
 
-Cause: Wrong import; crewai doesn’t expose tool.
+Ensured compatibility by upgrading crewai and crewai-tools together.
 
-Fix: Removed CrewAI dependency entirely.
+2. @tools vs @tool Decorator
 
-3. Pdf is not defined
+Issue: Using @tools caused:
 
-Cause: Tried to use Pdf without importing any PDF library.
+TypeError: 'module' object is not callable
 
-Fix: Replaced with PyPDF2
- to read PDFs.
 
-4. Multiple dependency conflicts (FastAPI + CrewAI + Opentelemetry, etc.)
+Fix: Correct decorator is @tool (singular) from crewai.
 
-Cause: Version mismatches across CrewAI ecosystem.
+from crewai import tool
 
-Fix: Removed all conflicting packages, kept only minimal dependencies (PyPDF2, google-generativeai, dotenv).
+class FinancialDocumentTool:
+    @tool("read_data_tool")
+    async def read_data_tool(path="data/sample.pdf"):
+        ...
 
-✅ Final solution: Gemini API + PyPDF2 → Lightweight, no conflicts, works reliably.
+3. Localhost Reload Issues
+
+Issue: Local server with auto-reload created conflicts while testing.
+
+Fix: Disabled reload with uvicorn main:app --reload=false.
+
+Alternatively, switched to API-based usage with Gemini to avoid local LLM runtime.
+
+4. Pdf Not Defined
+
+Issue:
+
+NameError: name 'Pdf' is not defined
+
+
+Fix: Installed and used unstructured or pypdf for parsing PDFs:
+
+pip install pypdf
+
+from pypdf import PdfReader
+
+5. Migration to Gemini API
+
+Issue: Ollama/local models required large downloads & conflicted dependencies.
+
+Fix: Integrated Gemini API (google-generativeai).
 
 ⚙️ Setup & Usage
-1. Clone the repo
-git clone https://github.com/yourusername/financial-document-analyzer.git
+1. Clone Repository
+git clone https://github.com/your-username/financial-document-analyzer.git
 cd financial-document-analyzer
 
-2. Create virtual environment
+2. Setup Virtual Environment
 python -m venv .venv
-source .venv/bin/activate   # On Linux/Mac
-.venv\Scripts\activate      # On Windows
+.venv\Scripts\activate    # Windows
+source .venv/bin/activate # Mac/Linux
 
-3. Install dependencies
+3. Install Dependencies
 pip install -r requirements.txt
 
-4. Add your Gemini API Key
+4. Configure Environment Variables
 
 Create a .env file:
 
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_google_gemini_api_key
 
-5. Place PDF File
-
-Put your financial document in data/sample.pdf.
-
-6. Run
+5. Run Application
 python main.py
 
-📄 Example Output
-📊 Financial Analysis Result:
+🔑 Gemini API Integration
 
-1. Investment Insights:
-   - Strong revenue growth ...
-   - Operating margin improved ...
+Install:
 
-2. Risk Assessment:
-   - High debt-to-equity ratio ...
-   - Market volatility concerns ...
-
-3. Key Highlights:
-   - Dividend increase ...
-   - Expansion into new markets ...
-
-📖 API Documentation (Gemini Integration)
-Endpoint Used
-
-Gemini is accessed via the Google Generative AI Python SDK
-.
-
-Model: gemini-1.5-flash
-
-Method: generate_content(prompt)
-
-Prompt Structure
-prompt = f"""
-You are a financial analyst. Analyze the following financial document:
----
-{pdf_text}
----
-Provide:
-1. Investment insights
-2. Risk assessment
-3. Key highlights
-"""
-
-Response
-
-The model returns structured natural language text:
-
-{
-  "text": "Investment Insights: ... Risk Assessment: ... Key Highlights: ..."
-}
-
-✅ Tech Stack
-
-Python 3.10+
-
-PyPDF2
- → Extracts text from PDF
-
-google-generativeai
- → Gemini API client
-
-python-dotenv
- → Manage environment variables
-
-🚀 Future Improvements
-
-Add FastAPI endpoint for uploading PDFs
-
-Store results in a database
-
-Support multi-file batch analysis
-
-Would you like me to also add FastAPI routes in the README (API-style usage) so it looks like a proper developer API doc, or keep it focused on script usage only?
-
-You said:
-how de acticvate .env file
-ChatGPT said:
-
-Good question 👍
-A .env file isn’t something you activate — it’s just a plain text file that stores environment variables.
-
-Your code loads it using:
-
-from dotenv import load_dotenv
-load_dotenv()
+pip install google-generativeai
 
 
-This means when you run python main.py, the .env file values (like GEMINI_API_KEY) get injected into your Python environment automatically.
+Usage in code (llm.py):
 
-📌 To “deactivate” or stop using .env
+import os
+import google.generativeai as genai
 
-You have a few options:
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-Remove the .env file
-Simply delete it:
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-rm .env      # Linux/Mac
-del .env     # Windows
-
-
-Comment out load_dotenv()
-In main.py (or wherever you load it), remove or comment:
-
-# load_dotenv()
+def ask_gemini(prompt: str) -> str:
+    response = model.generate_content(prompt)
+    return response.text
 
 
-Unset environment variables manually
+Example:
 
-Linux/Mac:
+print(ask_gemini("Summarize the financial risks in Q2 report."))
 
-unset GEMINI_API_KEY
+📖 API Documentation
+1. Financial Document Tool
 
+Endpoint: read_data_tool
 
-Windows (CMD):
+Input: PDF path (default: data/sample.pdf)
 
-set GEMINI_API_KEY=
+Output: Cleaned text content of PDF.
 
+2. Investment Tool
 
-Windows (PowerShell):
+Endpoint: analyze_investment_tool
 
-Remove-Item Env:\GEMINI_API_KEY
+Input: Financial document data (string)
 
+Output: Investment insights (future expansion).
 
-⚠️ But usually, you don’t need to “deactivate” it.
-If you want to switch API keys or stop using Gemini, you can just edit .env and remove/change the variable.
+3. Risk Tool
 
-Do you want me to show you how to switch from .env → system environment variables (so you don’t
+Endpoint: create_risk_assessment_tool
+
+Input: Financial document data (string)
+
+Output: Risk analysis (future expansion).
+
+4. Gemini Query Tool
+
+Function: ask_gemini(prompt: str)
+
+Input: Free-form question or analysis prompt.
+
+Output: AI-generated insights using Gemini API.
+
+🚀 Roadmap
+
+✅ Replace Ollama with Gemini API
+
+✅ Fix dependency conflicts
