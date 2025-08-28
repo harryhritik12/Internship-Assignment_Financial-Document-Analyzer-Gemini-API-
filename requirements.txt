@@ -1,0 +1,70 @@
+# Core packages - keep these versions as specified
+crewai==0.130.0
+crewai-tools==0.47.1
+
+# Web framework
+fastapi>=0.110.0
+
+# Google AI/Cloud packages - use compatible ranges
+google-ai-generativelanguage>=0.6.0
+google-api-core>=2.10.0
+google-api-python-client>=2.131.0
+google-auth>=2.29.0
+google-auth-httplib2>=0.2.0
+google-cloud-aiplatform>=1.53.0
+google-cloud-bigquery>=3.23.0
+google-cloud-core>=2.4.0
+google-cloud-resource-manager>=1.12.0
+google-cloud-storage>=2.16.0
+google-crc32c>=1.5.0
+google-generativeai>=0.5.0
+google-resumable-media>=2.7.0
+googleapis-common-protos>=1.63.0
+
+# Template and validation
+Jinja2>=3.1.0
+jsonschema>=4.22.0
+
+# LangChain
+langchain-core>=0.1.52
+langsmith>=0.1.67
+
+# Data processing
+numpy>=1.26.0
+pandas>=2.2.0
+
+# Auth and HTTP
+oauthlib>=3.2.0
+
+# OpenAI
+openai>=1.30.0
+
+# OpenTelemetry packages - use compatible ranges
+opentelemetry-api>=1.25.0
+opentelemetry-exporter-otlp-proto-common>=1.25.0
+opentelemetry-exporter-otlp-proto-grpc>=1.25.0
+opentelemetry-exporter-otlp-proto-http>=1.25.0
+opentelemetry-instrumentation>=0.46b0
+opentelemetry-instrumentation-asgi>=0.46b0
+opentelemetry-instrumentation-fastapi>=0.46b0
+opentelemetry-proto>=1.25.0
+opentelemetry-sdk>=1.25.0
+opentelemetry-semantic-conventions>=0.46b0
+opentelemetry-util-http>=0.46b0
+
+# Image processing
+pillow>=10.3.0
+
+# Protocol buffers
+protobuf>=4.25.0
+
+# Pydantic v2 - required by crewai 0.130.0 (DO NOT downgrade to v1)
+pydantic>=2.4.2
+
+# Click
+click>=8.1.0
+
+# NOTE: Removed specific pins for:
+# - onnxruntime (let crewai choose compatible version)
+# - pydantic_core (will be installed automatically with pydantic v2)
+# - pip (system managed)
